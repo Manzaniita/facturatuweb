@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos de la Tienda</title>
+    <link rel="stylesheet" href="/static/css/punto_venta.css">
+</head>
+<body>
+    <!-- Carrito -->
+    <div id="cart-container">
+        <div id="cliente-info"></div>
+        <h2>Carrito</h2>
+        <ul id="cart-items">
+            <!-- Los productos añadidos al carrito aparecerán aquí -->
+        </ul>
+        <div id="cart-total">Total: $0.00</div>
+        <button id="checkout-button">Procesar Venta</button>
+        <button id="register-client-button">Registrar Cliente</button>
+    </div>
+
+    <!-- Buscador -->
+    <div id="search-bar">
+        <input type="text" id="search-input" placeholder="Buscar productos por nombre, descripción, categoría o SKU">
+        <button id="search-button">Buscar</button>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div id="main-content">
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>  <!-- Display error message -->
+        {% endif %}
+        
+        <div id="product-list">
+            {% for producto in productos %}
+            <div class="product-card" data-product-id="{{ producto.id }}" data-product-price="{{ producto.price }}">
+                <img src="{{ producto.images[0].src }}" alt="{{ producto.name }}">
+                <div class="product-name">{{ producto.name }}</div>
+                <div class="product-price">${{ producto.price }}</div>
+                <div class="product-stock">Stock: {{ producto.stock_quantity }}</div>
+                <div class="product-sku">SKU: {{ producto.sku }}</div>
+                <div class="product-category">Categoría: {{ producto.categories[0].name }}</div>
+                <button class="add-to-cart">Agregar al Carrito</button>
+                <a href="{{ producto.permalink }}" class="product-link" target="_blank">Ver Producto</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Icono de carga -->
+    <div id="loading-icon">
+        <img src="/static/images/spinning-dots.svg" alt="Cargando...">
+    </div>
+
+    <!-- Modal para procesar venta -->
+    <div id="sale-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-button" class="close-button">&times;</span>
+            <h2>Procesar Venta</h2>
+            <div>
+                <label for="payment-method">Método de Pago:</label>
+                <select id="payment-method">
+                    <option value="efectivo">Efectivo</option>
+                    <option value="transferencia">Transferencia (+5%)</option>
+                    <option value="credito-debito">Crédito/Débito (+10%)</option>
+                    <option value="3-cuotas">3 Cuotas (+15%)</option>
+                    <option value="6-cuotas">6 Cuotas (+50%)</option>
+                </select>
+            </div>
+            <div>
+                <label for="total-calculated">Total Calculado:</label>
+                <span id="total-calculated">$0.00</span>
+            </div>
+            <div>
+                <label for="amount-paid">Monto Abonado:</label>
+                <input type="number" id="amount-paid" min="0" step="0.01">
+            </div>
+            <div>
+                <label for="change">Vuelto:</label>
+                <span id="change">$0.00</span>
+            </div>
+            <div class="quick-buttons">
+                <button id="exact-amount">Total Justo</button>
+                <button id="round-hundred">Redondear a Centena</button>
+                <button id="round-thousand">Redondear a Miles</button>
+            </div>
+            <div class="modal-actions">
+                <button id="confirm-sale">Confirmar Venta</button>
+                <button id="cancel-sale">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar producto -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="document.getElementById('edit-modal').style.display='none'">×</span>
+            <h2>Editar Producto</h2>
+            <div id="edit-product-name"></div>
+            <label for="edit-product-price">Precio:</label>
+            <input type="number" id="edit-product-price">
+            <label for="edit-product-quantity">Cantidad:</label>
+            <input type="number" id="edit-product-quantity">
+            <div id="edit-serial-numbers"></div>
+            <button id="save-changes">Guardar</button>
+            <button id="cancel-changes">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Formulario del Cliente -->
+    <div id="cliente-form" class="modal">
+        <div class="modal-content">
+            <span id="close-cliente-form" class="close-button">×</span>
+            <h2>Datos del Cliente</h2>
+            <form id="cliente-data">
+                <input type="text" id="cliente-nombre" placeholder="Nombre*" required>
+                <input type="text" id="cliente-dni" placeholder="DNI">
+                <input type="text" id="cliente-telefono" placeholder="Teléfono">
+                <input type="email" id="cliente-correo" placeholder="Correo">
+                <input type="text" id="cliente-direccion" placeholder="Dirección">
+                <select id="cliente-tipo">
+                    <option value="consumidor_final">Consumidor Final</option>
+                    <option value="responsable_inscripto">Responsable Inscripto</option>
+                    <option value="monotributista">Monotributista</option>
+                </select>
+                <button type="submit">Guardar Cliente</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para el Ticket -->
+    <div id="ticket-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-ticket-modal" class="close-button">×</span>  <!-- Botón para cerrar el modal -->
+            <h2>Ticket de Venta</h2>
+            <pre id="ticket-content"></pre>
+            <button id="print-ticket-button">Imprimir Ticket</button>
+        </div>
+    </div>
+
+    <div id="ticket-section" style="display: none;">  <!-- Inicialmente oculto -->
+        <h2>Ticket de Venta</h2>
+        <pre id="ticket-content"></pre>
+        <button onclick="window.print()">Imprimir Ticket</button>
+    </div>
+
+    <script src="/static/js/punto_venta.js"></script>
+    <script>
+        // Añadir el evento de scroll para cargar más productos
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                loadMoreProducts();
+            }
+        });
+
+        // Nuevo código para el formulario de cliente
+        const clienteForm = document.getElementById('cliente-form');
+        const closeClienteForm = document.getElementById('close-cliente-form');
+        const clienteDataForm = document.getElementById('cliente-data');
+
+        // Abre el formulario de cliente
+        // ... (lógica para abrir el formulario cuando sea necesario)
+
+        closeClienteForm.addEventListener('click', () => {
+            clienteForm.style.display = 'none';
+        });
+
+        clienteDataForm.onsubmit = async (e) => {
+            e.preventDefault(); // Evita el envío normal del formulario
+
+            const nombre = document.getElementById('cliente-nombre').value;
+            const dni = document.getElementById('cliente-dni').value;
+            const telefono = document.getElementById('cliente-telefono').value;
+            const correo = document.getElementById('cliente-correo').value;
+            const direccion = document.getElementById('cliente-direccion').value;
+            const tipo_cliente = document.getElementById('cliente-tipo').value;
+
+            try {
+                const response = await fetch('/punto_venta/guardar_cliente', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, dni, telefono, correo, direccion, tipo_cliente })
+                });
+
+                if (response.ok) {
+                    const data = await response.json(); // Obtener la respuesta JSON
+                    clienteSeleccionado = data.cliente; // Actualizar clienteSeleccionado con los datos del cliente
+
+                    clienteForm.style.display = 'none'; // Cerrar el modal después del éxito
+
+                    // Actualizar la información del cliente en la vista principal
+                    clienteInfoDiv.textContent = `Cliente: ${clienteSeleccionado.nombre} (DNI: ${clienteSeleccionado.dni})`;
+
+                    // Llamar a updateCartDOM para que el carrito se mantenga visible
+                    updateCartDOM();
+                } else {
+                    console.error('Error al guardar el cliente:', response.status);
+                }
+            } catch (error) {
+                console.error('Error al guardar el cliente:', error);
+            }
+        };
+
+        .then(data => {
+            // ... lógica existente para manejo de respuesta ...
+
+            if (data.message || data.timeout) {  // Mostrar ticket si hay mensaje o timeout
+                const ticketContent = document.getElementById('ticket-content');
+                // Ajusta esta parte con la lógica para generar el contenido del ticket
+                ticketContent.textContent = `
+                    // ... información del ticket (productos, total, etc. basados en el carrito "cart") ...
+                `;
+
+                document.getElementById('ticket-section').style.display = 'block';
+            }
+        })
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido al Sistema</title>
+    <link rel="stylesheet" href="static/css/index.css">
+    <script>
+        function toggleAdminSection() {
+            document.getElementById('admin-section').style.display = 'block';
+        }
+
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const password = document.getElementById('admin-password').value;
+            if (password === 'admin123') { // Cambiar por tu lógica de autenticación
+                window.location.href = '/admin-panel';
+            } else {
+                document.getElementById('error-message').textContent = 'Contraseña incorrecta. Intenta de nuevo.';
+            }
+        }
+
+        function redirectToPOS() {
+            window.location.href = '/punto_venta';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Bienvenido al Sistema de Gestión</h1>
+        <div class="button-group">
+            <button onclick="redirectToPOS()">Soy Cajero</button>
+            <button onclick="toggleAdminSection()">Soy Admin</button>
+        </div>
+        <div id="admin-section" style="display: none;">
+            <form onsubmit="handleAdminLogin(event)">
+                <label for="admin-password">Contraseña:</label>
+                <input type="password" id="admin-password" required>
+                <button type="submit">Ingresar</button>
+                <p id="error-message" class="error-message"></p>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
