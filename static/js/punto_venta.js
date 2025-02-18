@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Función para agregar un producto al carrito
-    function addProductToCart(productId, name, price, image) {
+    function addProductToCart(productId, name, price, image, stock) { // Agregar stock como parámetro
         if (cart[productId]) {
             cart[productId].quantity++;
         } else {
@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 price, 
                 quantity: 1, 
                 image,
+                stock: stock, // Almacenar el stock aquí
                 serialNumbers: [] // Agregar esta línea
             };
         }
@@ -138,21 +139,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para abrir el modal de edición (CORREGIDA)
+    // Función para abrir el modal de edición (FIXED)
     function openEditModal(event) {
         const productId = event.target.dataset.productId;
         const item = cart[productId];
 
-        // Rellenar el modal con los datos del producto
-        const productName = document.getElementById('edit-product-name');
-        const productPrice = document.getElementById('edit-product-price');
-        const serialNumbersContainer = document.getElementById('edit-serial-numbers');
+        // Mostrar el modal
+        const editModal = document.getElementById('edit-modal');
+        editModal.style.display = 'block';
 
+        // Obtener elementos del modal DESPUÉS de mostrarlo
+        const productName = editModal.querySelector('#edit-product-name');
+        const productPrice = editModal.querySelector('#edit-product-price');
+        const serialNumbersContainer = editModal.querySelector('#edit-serial-numbers');
+        let productQuantity; // Declarar la variable
+
+        // Rellenar el modal con los datos del producto
         productName.textContent = item.name;
         productPrice.value = item.price;
 
-        // Input para la cantidad (CORREGIDO)
-        let productQuantity = document.getElementById('edit-product-quantity');
+        // Input para la cantidad (FIXED)
         if (!productQuantity) {
             productQuantity = document.createElement('input');
             productQuantity.type = 'number';
@@ -160,18 +166,16 @@ document.addEventListener('DOMContentLoaded', () => {
             productQuantity.id = 'edit-product-quantity';
             serialNumbersContainer.parentNode.insertBefore(productQuantity, serialNumbersContainer);
         }
+
+        productQuantity = editModal.querySelector('#edit-product-quantity'); // Obtener el elemento AQUÍ
         productQuantity.value = item.quantity;
 
-        // Event listener para actualizar la cantidad y los SN (CORREGIDO)
+        // Event listener para actualizar la cantidad y los SN (FIXED)
         productQuantity.addEventListener('change', () => {
             updateQuantityAndSerials(productId, productQuantity, serialNumbersContainer);
         });
 
         generateSerialInputs(productId, item.quantity, serialNumbersContainer);
-
-        // Mostrar el modal
-        const editModal = document.getElementById('edit-modal');
-        editModal.style.display = 'block';
 
         // Agregar evento al botón "Guardar" del modal (modificado)
         const saveButton = document.getElementById('save-changes');
@@ -252,7 +256,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const productName = productCard.querySelector('.product-name').textContent;
             const productPrice = parseFloat(productCard.dataset.productPrice);
             const productImage = productCard.querySelector('img').src;
-            addProductToCart(productId, productName, productPrice, productImage);
+            const productStock = parseInt(productCard.querySelector('.product-stock').textContent.replace('Stock: ', ''));
+            addProductToCart(productId, productName, productPrice, productImage, productStock); // Pasar el stock a addProductToCart
         });
     });
 
@@ -321,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     quantity: cart[productId].quantity,
                     custom_price: cart[productId].price,
                     name: cart[productId].name,
-                    new_stock: parseInt(productCard.querySelector('.product-stock').textContent.replace('Stock: ', '')) - cart[productId].quantity // Calcular el nuevo stock
+                    new_stock: cart[productId].stock - cart[productId].quantity, // Usar el stock almacenado en el carrito.
                 };
 
                 if (productCard) {  // Si la tarjeta se encontró, obtener el SKU
@@ -570,7 +575,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const productName = productCard.querySelector('.product-name').textContent;
             const productPrice = parseFloat(productCard.dataset.productPrice);
             const productImage = productCard.querySelector('img').src;
-            addProductToCart(productId, productName, productPrice, productImage);
+            const productStock = parseInt(productCard.querySelector('.product-stock').textContent.replace('Stock: ', ''));
+            addProductToCart(productId, productName, productPrice, productImage, productStock); // Pasar el stock a addProductToCart
         });
         productCard.appendChild(addToCartButton);
 
