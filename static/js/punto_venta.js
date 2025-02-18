@@ -305,6 +305,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     confirmSaleButton.addEventListener('click', () => {
+        // Deshabilitar el botón y mostrar el mensaje de "Procesando..."
+        confirmSaleButton.disabled = true;
+        confirmSaleButton.textContent = "Procesando...";
+
         const amountPaid = parseFloat(amountPaidInput.value);
         const paymentMethod = paymentMethodSelect.value;
 
@@ -393,12 +397,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     alert('Error al registrar la venta: ' + 'Error desconocido');
                 }
+                // Después de que la venta se procese (exitosamente o no), 
+                // volver a habilitar el botón y restaurar el texto original.
+                confirmSaleButton.disabled = false;
+                confirmSaleButton.textContent = "Confirmar Venta";
             })
             .catch(error => {
                 alert('Error al registrar la venta: ' + error);
+                confirmSaleButton.disabled = false; // Volver a habilitar el botón en caso de error
+                confirmSaleButton.textContent = "Confirmar Venta";
             });
         } else {
             alert('El monto abonado es insuficiente.');
+            confirmSaleButton.disabled = false; // Volver a habilitar el botón en caso de error
+            confirmSaleButton.textContent = "Confirmar Venta";
         }
     });
 
