@@ -353,37 +353,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify(saleData)
             })
-            .then(response => {
-                console.log('Response status:', response.status);
-                return response.text().then(text => {
-                    console.log('Response text:', text);
-                    try {
-                        return JSON.parse(text);
-                    } catch (error) {
-                        console.error('Invalid JSON response:', text);
-                        throw new Error('Invalid JSON response');
-                    }
-                });
-            })
+            .then(response => response.json())
             .then(data => {
                 if (data.message || data.timeout) {
-                    alert('Venta confirmada!');
-                    saleModal.style.display = 'none';
+                    const ticketContent = data.ticket;  // Use the ticket returned by the server
 
-                    // Mostrar el ticket en un modal
-                    const ticketModal = document.getElementById('ticket-modal'); // Asegúrate de tener este elemento en tu HTML
-                    const ticketContent = document.getElementById('ticket-content');
-                    ticketContent.textContent = data.ticket;
+                    // Show the ticket in a modal
+                    const ticketModal = document.getElementById('ticket-modal');
+                    const ticketContentPre = document.getElementById('ticket-content'); // Get the <pre> element
+                    ticketContentPre.textContent = ticketContent; // Assign the content to the <pre>
                     ticketModal.style.display = 'block';
 
-                    // Agregar evento al botón de imprimir del modal
-                    const printButton = document.getElementById('print-ticket-button'); // Asegúrate de tener este elemento en tu HTML
+                    // Add event to the print button in the modal
+                    const printButton = document.getElementById('print-ticket-button');
                     printButton.addEventListener('click', () => {
-                        printTicket(data.ticket); // Llamar a la función para imprimir
+                        printTicket(ticketContent); // Call the function to print
                     });
 
-                    // Agregar evento al botón de cerrar el modal
-                    const closeTicketModalButton = document.getElementById('close-ticket-modal'); // Asegúrate de tener este elemento en tu HTML
+                    // Add event to the close button in the modal
+                    const closeTicketModalButton = document.getElementById('close-ticket-modal');
                     closeTicketModalButton.addEventListener('click', () => {
                         ticketModal.style.display = 'none';
                     });
@@ -394,11 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateCartDOM();
                 } else if (data.error) {
                     alert('Error al registrar la venta: ' + (data.error || 'Error desconocido'));
-                } else {
-                    alert('Error al registrar la venta: ' + 'Error desconocido');
                 }
-                // Después de que la venta se procese (exitosamente o no), 
-                // volver a habilitar el botón y restaurar el texto original.
                 confirmSaleButton.disabled = false;
                 confirmSaleButton.textContent = "Confirmar Venta";
             })

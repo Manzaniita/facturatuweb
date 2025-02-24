@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket de Venta</title>
+    <style>
+        /* Estilos para el ticket */
+        body {
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .ticket-container {
+            width: 300px; /* Ancho del ticket (ajusta según impresora) */
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px dashed #ccc;
+        }
+        .ticket-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .ticket-data {
+            margin-bottom: 10px;
+        }
+        .ticket-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .ticket-details th, .ticket-details td {
+            padding: 5px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        .ticket-totals {
+            text-align: right;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ticket-container" id="ticket">
+      
+    </div>
+
+    <button onclick="imprimirTicket()">Imprimir Ticket</button>
+
+    <script>
+      // Datos de ejemplo (reemplazar con datos reales del carrito)
+      const datosNegocio = {
+          nombre: "Mi Tienda",
+          direccion: "Calle Principal 123",
+          telefono: "123-456-7890",
+          cuitCuil: "12-34567890-1"
+      };
+
+      let carrito = [
+          { nombre: "Producto A", cantidad: 2, precio: 10 },
+          { nombre: "Producto B", cantidad: 1, precio: 25 },
+      ];
+
+      let cliente = {
+        nombre: "Nombre",
+        cuitCuil: "CUIT",
+        direccion: "Direccion"
+      };
+
+      let montoAbonado = 0; // Se establece cuando el cliente paga
+
+      function generarTicket(datosNegocio, datosCliente, carrito, montoAbonado, vuelto) {
+          const ticketContainer = document.getElementById('ticket');
+          let ticketHTML = `
+              <div class="ticket-header">
+                  <h3>${datosNegocio.nombre}</h3>
+                  <p>${datosNegocio.direccion} - ${datosNegocio.telefono}</p>
+                  <p>CUIT/CUIL: ${datosNegocio.cuitCuil}</p>
+              </div>
+              <div class="ticket-data">
+                  <p>Cliente: ${datosCliente.nombre}</p>
+                  <p>CUIT/CUIL: ${datosCliente.cuitCuil}</p>
+                  <p>Dirección: ${datosCliente.direccion}</p>
+              </div>
+              <div class="ticket-details">
+                  <table>
+                      <thead>
+                          <tr>
+                              <th>Producto</th>
+                              <th>Cant.</th>
+                              <th>Precio</th>
+                              <th>Subtotal</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+          `;
+
+          let total = 0;
+          carrito.forEach(item => {
+              const subtotal = item.cantidad * item.precio;
+              total += subtotal;
+              ticketHTML += `
+                          <tr>
+                              <td>${item.nombre}</td>
+                              <td>${item.cantidad}</td>
+                              <td>${item.precio.toFixed(2)}</td>
+                              <td>${subtotal.toFixed(2)}</td>
+                          </tr>
+              `;
+          });
+
+          ticketHTML += `
+                      </tbody>
+                  </table>
+              </div>
+              <div class="ticket-totals">
+                  <p>Total: ${total.toFixed(2)}</p>
+                  <p>Abonado: ${montoAbonado.toFixed(2)}</p>
+                  <p>Vuelto: ${vuelto.toFixed(2)}</p>
+              </div>
+          `;
+          ticketContainer.innerHTML = ticketHTML;
+      }
+
+      function imprimirTicket() {
+          window.print();
+      }
+
+      // Calcular totales y mostrar el ticket al cargar la página
+      const total = carrito.reduce((acc, item) => acc + item.cantidad * item.precio, 0);
+      const vuelto = montoAbonado - total; // Calcula el vuelto.
+      generarTicket(datosNegocio, cliente, carrito, montoAbonado, vuelto);
+    </script>
+
+</body>
+</html>

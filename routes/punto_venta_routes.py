@@ -290,3 +290,39 @@ def actualizar_cliente(cliente_id):
         return jsonify({'message': 'Cliente actualizado correctamente', 'cliente': cliente.to_dict()}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@punto_venta_bp.route('/generar_ticket', methods=['POST'])
+def generar_ticket_ruta():
+    try:
+        data = request.get_json()
+        print("Datos recibidos en /generar_ticket:", data)  # Imprimir los datos recibidos
+        cliente = data.get('cliente')
+        items = data.get('items')
+        monto_abonado = data.get('monto_abonado')
+        print("Cliente:", cliente)  # Imprimir cliente
+        print("Items:", items)  # Imprimir items
+        print("Monto abonado:", monto_abonado)  # Imprimir monto_abonado
+
+        if not cliente or not items or monto_abonado is None:
+            return jsonify({'error': 'Datos incompletos para el ticket'}), 400
+
+        # Calcular el total del carrito
+        total = calculate_total_cart(items, data.get('payment_method'))
+
+        vuelto = float(monto_abonado) - total
+
+        # Datos del negocio (configúralos en tu aplicación)
+        datos_negocio = {
+            "nombre": "Tu Negocio",
+            "direccion": "Dirección del Negocio",
+            "telefono": "Teléfono del Negocio",
+            "cuitCuil": "CUIT/CUIL del Negocio"
+        }
+
+        # Generar el HTML del ticket
+        ticket_html = generar_ticket_html(datos_negocio, cliente, items, total, monto_abonado, vuelto)
+
+        return jsonify({'ticket': ticket_html}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
